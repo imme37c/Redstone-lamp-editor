@@ -57,6 +57,18 @@ class LampScreen:
                 self.pixels[x][y] = img.getpixel((x, y)) > 128
         self.update_image()
 
+    def fill_canvas(self):
+        for x in range(self.sx):
+            for y in range(self.sy):
+                self.pixels[x][y] = True
+        self.update_image()
+
+    def clear_canvas(self):
+        for x in range(self.sx):
+            for y in range(self.sy):
+                self.pixels[x][y] = False
+        self.update_image()
+
 
 class LampApp(QWidget):
     def __init__(self):
@@ -65,6 +77,7 @@ class LampApp(QWidget):
         self.lamp = LampScreen(32, 32)
         self.drawing = True
         self.erasing = False
+        self.bucket_mode = False
         self.mouse_down = False
 
         self.label = QLabel()
@@ -74,7 +87,6 @@ class LampApp(QWidget):
         self.label.mouseMoveEvent = self.mouse_move
         self.label.mouseReleaseEvent = self.mouse_release
 
-        # Buttons
         self.btn_export_png = QPushButton("Export PNG")
         self.btn_export_png.clicked.connect(self.export_png)
 
@@ -87,6 +99,13 @@ class LampApp(QWidget):
         self.btn_img2lamp = QPushButton("Image → Lamp")
         self.btn_img2lamp.clicked.connect(self.img2lamp)
 
+        self.btn_clear_canvas = QPushButton("Clear Canvas")
+        self.btn_clear_canvas.clicked.connect(self.clear_canvas)
+
+        self.btn_bucket = QPushButton("Bucket Fill")
+        self.btn_bucket.setCheckable(True)
+        self.btn_bucket.clicked.connect(self.toggle_bucket)
+
         self.chk_draw = QCheckBox("Drawing mode")
         self.chk_draw.setChecked(True)
         self.chk_draw.stateChanged.connect(self.toggle_drawing)
@@ -95,9 +114,15 @@ class LampApp(QWidget):
         self.chk_erase.setChecked(False)
         self.chk_erase.stateChanged.connect(self.toggle_erase)
 
-        # Layout
         button_layout = QHBoxLayout()
-        for btn in [self.btn_export_png, self.btn_export_json, self.btn_load_json, self.btn_img2lamp]:
+        for btn in [
+            self.btn_export_png,
+            self.btn_export_json,
+            self.btn_load_json,
+            self.btn_img2lamp,
+            self.btn_clear_canvas,
+            self.btn_bucket
+        ]:
             button_layout.addWidget(btn)
 
         layout = QVBoxLayout()
@@ -105,12 +130,12 @@ class LampApp(QWidget):
         layout.addWidget(self.chk_draw)
         layout.addWidget(self.chk_erase)
         layout.addLayout(button_layout)
-
         self.setLayout(layout)
+
         self.update_preview()
 
     def mouse_press(self, event):
-        if not self.drawing:
+        if not (self.drawing or self.bucket_mode):
             return
         self.mouse_down = True
         self.paint_at(event)
@@ -126,17 +151,60 @@ class LampApp(QWidget):
         pos = event.position().toPoint()
         x = pos.x() // 10
         y = pos.y() // 10
-        if self.erasing:
-            self.lamp.set_pixel(x, y, False)
+
+        if self.bucket_mode:
+            if 0 <= x < self.lamp.sx and 0 <= y < self.lamp.sy:
+                target_state = self.lamp.pixels[x][y]
+                new_state = not target_state
+                self.bucket_fill(x, y, target_state, new_state)
         else:
-            self.lamp.set_pixel(x, y, True)
+            if self.erasing:
+                self.lamp.set_pixel(x, y, False)
+            else:
+                self.lamp.set_pixel(x, y, True)
+
         self.update_preview()
+
+    def bucket_fill(self, x, y, target_state, new_state):
+        if target_state == new_state:
+            return
+        stack = [(x, y)]
+        while stack:
+            cx, cy = stack.pop()
+            if 0 <= cx < self.lamp.sx and 0 <= cy < self.lamp.sy:
+                if self.lamp.pixels[cx][cy] == target_state:
+                    self.lamp.pixels[cx][cy] = new_state
+                    stack.extend([
+                        (cx+1, cy),
+                        (cx-1, cy),
+                        (cx, cy+1),
+                        (cx, cy-1)
+                    ])
+        self.lamp.update_image()
 
     def toggle_drawing(self):
         self.drawing = self.chk_draw.isChecked()
+        if self.drawing:
+            self.bucket_mode = False
+            self.btn_bucket.setChecked(False)
 
     def toggle_erase(self):
         self.erasing = self.chk_erase.isChecked()
+        if self.erasing:
+            self.bucket_mode = False
+            self.btn_bucket.setChecked(False)
+
+    def toggle_bucket(self):
+        self.bucket_mode = self.btn_bucket.isChecked()
+        if self.bucket_mode:
+            self.drawing = False
+            self.erasing = False
+            self.chk_draw.setChecked(False)
+            self.chk_erase.setChecked(False)
+
+    def clear_canvas(self):
+        self.lamp.clear_canvas()
+        self.update_preview()
 
     def update_preview(self):
         self.label.setPixmap(self.get_pixmap())
@@ -151,7 +219,7 @@ class LampApp(QWidget):
         path, _ = QFileDialog.getSaveFileName(self, "Export PNG", "", "PNG Files (*.png)")
         if path:
             self.lamp.export_png(path)
-            QMessageBox.information(self, "Success", f"PNG opgeslagen naar:\n{path}")
+            QMessageBox.information(self, "Success", f"PNG saved to:\n{path}")
 
     def export_json(self):
         path, _ = QFileDialog.getSaveFileName(self, "Export JSON", "", "JSON Files (*.json)")
@@ -166,7 +234,7 @@ class LampApp(QWidget):
             self.update_preview()
 
     def img2lamp(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Selecteer img", "", "Images (*.png *.jpg *.bmp)")
+        path, _ = QFileDialog.getOpenFileName(self, "Select Image", "", "Images (*.png *.jpg *.bmp)")
         if path:
             self.lamp.from_image(path)
             self.update_preview()
