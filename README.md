@@ -28,6 +28,8 @@ python lamp_editor.py
 | Export JSON                  | Save current lamp state as JSON   |
 | Load JSON                    | Load a saved lamp state           |
 | Image → Lamp                | Convert an image into a lamp grid |
+| Bucket tool | Bucket tool|
+| Clear canvas | clear canvas tool |
 
 ---
 
