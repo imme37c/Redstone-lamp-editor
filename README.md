@@ -74,6 +74,18 @@ Credits are appreciated if you share or modify the project.
 This project was inspired by [mattbatwings](https://github.com/mattbatwings),
 who created [lampsim](https://github.com/mattbatwings/lampsim) — a Redstone lamp simulator for Minecraft.
 
+## How to export world
+
+Press the export world button and save the zip file as you like. Now unzip the file and place the folder in
+windows: %APPDATA%\.minecraft\saves
+mac: ~/Library/Application Support/minecraft/saves
+linux: ~/.minecraft/saves
+Now you can open your world in any version that is 1.18.1 or higher and the pixelart should be there.
+**Note:** The game will say it may be incompatible but you can ignore that.
+
+## How to modify blocks
+You can add more blocks by putting .png files in the blocks folder. The program will automaticly use them for both the preview and world. **Disclaimer!!** If you add blocks with names that are not in the game files, that are entities, or that are added after 1.18.1, the export world option wont work.
+
 ## Examples
 
 ![guy1](examples/guy1.png)
