@@ -76,10 +76,10 @@ who created [lampsim](https://github.com/mattbatwings/lampsim) — a Redstone la
 
 ## How to export world
 
-Press the export world button and save the zip file as you like. Now unzip the file and place the folder in
-windows: %APPDATA%\.minecraft\saves
-mac: ~/Library/Application Support/minecraft/saves
-linux: ~/.minecraft/saves
+Press the export world button and save the zip file as you like. Now unzip the file and place the folder in  
+**windows:** %APPDATA%\.minecraft\saves  
+**mac:** ~/Library/Application Support/minecraft/saves  
+**linux:** ~/.minecraft/saves  
 Now you can open your world in any version that is 1.18.1 or higher and the pixelart should be there.
 **Note:** The game will say it may be incompatible but you can ignore that.
 
