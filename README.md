@@ -74,4 +74,13 @@ Credits are appreciated if you share or modify the project.
 This project was inspired by [mattbatwings](https://github.com/mattbatwings),
 who created [lampsim](https://github.com/mattbatwings/lampsim) — a Redstone lamp simulator for Minecraft.
 
+## Examples
 
+![guy1](examples/guy1.png)
+![guy2](examples/guy2.png)
+![guy3](examples/guy3.png)
+![m1](examples/m1.png)
+![m2](examples/m2.png)
+![shrek1](examples/shrek1.png)
+![shrek2](examples/shrek2.png)
+![shrek3](examples/shrek3.png)
